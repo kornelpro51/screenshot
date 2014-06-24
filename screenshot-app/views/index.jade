@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Screenshots
+  form(method="get", action="/getcapture")
+    input(type="url", name="url")
+    button Do Capture
