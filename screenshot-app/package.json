@@ -11,9 +11,7 @@
     "jade": "*",
     "palette": "*",
     "redis": "0.7.x",
-    "canvas": "~1.1.2",
     "stylus": "0.21.x",
-    "phantomjs": "~1.9.2",
     "socket.io": "^1.0.4",
     "cuid": "^1.2.4",
     "atob": "^1.1.2"
