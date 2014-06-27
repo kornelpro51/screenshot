@@ -5,7 +5,6 @@
 
 var express = require('express')
   , stylus = require('stylus')
-  , redis = require('redis')
   , http = require('http')
   , fs = require("fs")
   , atob = require("atob")
@@ -20,7 +19,6 @@ var counter = 0;
 app = express();
 
 app.configure(function(){
-  app.db = redis.createClient();
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('phantom', 'phantomjs');
