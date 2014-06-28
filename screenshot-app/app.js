@@ -57,7 +57,7 @@ app.get('/getcapture', function(req, res) {
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
-server.listen(3000);
+server.listen(80, "0.0.0.0");
 var responses = {};
 function pushResponse (reqId, res) {
   responses[reqId] = res;
