@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 
+var HTTP_PORT = 80;
 var express = require('express')
   , stylus = require('stylus')
   , http = require('http')
@@ -40,24 +41,32 @@ app.configure('development', function(){
   app.use(express.errorHandler()); 
 });
 
-//require('./routes');
+// --  Setup HTTP request listener --------------------
 
 app.get('/', function(req, res) {
   res.render('index');
 });
+
 app.get('/getcapture', function(req, res) {
   if ( req.query.url ) {
     console.log(' *** capture start', req.query.url);
+
+    // store http response object.
     pushResponse(req.requestId, res);
+
+    // send screenshot request to the chrome extension.
     io.sockets.emit('docapture', {url:req.query.url, requestId: req.requestId})
   } else {
     res.render('index');
   }
 });
+// --  Create HTTP / socket.io server --------------------
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
-server.listen(80, "0.0.0.0");
+server.listen(HTTP_PORT, "0.0.0.0");
+
+
 var responses = {};
 function pushResponse (reqId, res) {
   responses[reqId] = res;
@@ -65,22 +74,25 @@ function pushResponse (reqId, res) {
 function popResponse (reqId) {
   return responses[reqId];
 }
+// --  socket.io event listener --------------------
 
 io.on('connection', function (socket) {
-  socket.emit('init', { hello: 'world' });
+  socket.emit('init', { command: 'init' });
+
+  // The screenshot result arrived from chrome extension
   socket.on('captureresult', function (result) {
-    //console.log(' *** capture result', result);
+
+    // pop response by request Id
     var res = popResponse(result.requestId);
     if (!res) {
       return;
     }
     var base64Data = result.data.replace(/^data:image\/png;base64,/,"");
-
     var buf = new Buffer(base64Data, 'base64');
-
     res.writeHead(200, {'Content-Type': 'image/png' });
     res.end(buf, 'binary');
 
+    // save the screenshot
     counter++;
     fs.writeFile("./captures/"+Date.now()+"_"+counter+".png", base64Data, 'base64', function(err) {
       if (err) {
@@ -93,4 +105,4 @@ io.on('connection', function (socket) {
 });
 
 
-console.log("Express server listening on port 3000");
+console.log("Express server listening on port " + HTTP_PORT);
